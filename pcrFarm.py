@@ -3,6 +3,7 @@ import subprocess
 import json
 import threading
 from Automator import *
+from progress.bar import Bar
 
 """获取设备列表"""
 subprocess.check_output("./adb/adb.exe connect 127.0.0.1:5554")  # killing...
@@ -31,8 +32,9 @@ farmNum, kickedOut, mainAccountName, mainAccountPassword, id = (
     config["id"],
 )
 deviceNum = len(automators)
-print("农场数量：%d" % (farmNum))
-print("模拟器数量：%d" % (deviceNum))
+print("农场数量：%d\n模拟器数量：%d" % (farmNum, deviceNum))
+if kickedOut:
+    print("请注意：执行完后将被踢出工会！")
 
 # 读取账号信息
 # lines:账号字符串行列表
@@ -61,14 +63,15 @@ goodAccountsLock = threading.Lock()  # 线程锁
 accountIndex = 0  # 账号索引值(互斥访问)
 accountIndexLock = threading.Lock()  # 线程锁
 barrier = threading.Barrier(deviceNum)  # 栅栏
+bar = Bar("脚本运行中", max=accountsNum1 + accountsNum2)
+barLock = threading.Lock()  # 线程锁
 
 # 线程函数
 def worker(automator):
-    global accountIndex, goodAccounts
+    global accountIndex, goodAccounts, bar
     # 返回首页
     automator.keyevent("home")
     # 打开公主连结APP
-    # automator.showToast("正在打开公主连结APP")
     automator.touchToAnotherPage("tpl1592013602699.png")
     # 完成一个农场
     while True:
@@ -79,7 +82,6 @@ def worker(automator):
         account = accounts[accountIndex]
         accountIndex += 1
         accountIndexLock.release()  # 解锁
-        # automator.showToast("正在操作: %s" % (account[0]))
         # 登录至主页
         automator.loginToIndex(account)
         # 任务：完成地下城
@@ -90,14 +92,16 @@ def worker(automator):
         # 返回标题页面
         automator.returnTitle()
         # 进度更新
-        # automator.showToast("已完成: %s" % (account[0]))
+        barLock.acquire()  # 上锁
+        bar.next()
+        barLock.release()  # 解锁
 
     # 等待其他进程
     barrier.wait()
 
     if farmNum == 1:
         if automator.devicesName == devicesNames[0]:
-            print("账号总计 %d 个，完成地下城总计 %d 个" % (accountsNum1, goodAccounts))
+            # print("账号总计 %d 个，完成地下城总计 %d 个" % (accountsNum1, goodAccounts))
             if kickedOut:
                 # 踢出主号
                 automator.dissmiss(accounts[0])
@@ -120,7 +124,6 @@ def worker(automator):
             account = accounts[accountIndex]
             accountIndex += 1
             accountIndexLock.release()  # 解锁
-            # automator.showToast("正在操作: %s" % (account[0]))
             # 登录至主页
             automator.loginToIndex(account)
             # 任务：完成地下城
@@ -131,13 +134,15 @@ def worker(automator):
             # 返回标题页面
             automator.returnTitle()
             # 进度更新
-            # automator.showToast("已完成: %s" % (account[0]))
+            barLock.acquire()  # 上锁
+            bar.next()
+            barLock.release()  # 解锁
 
         # 等待其他进程
         barrier.wait()
 
         if automator.devicesName == devicesNames[0]:
-            # automator.showToast(
+            # print(
             #     "账号总计 %d 个，完成地下城总计 %d 个" % (accountsNum1 + accountsNum2, goodAccounts)
             # )
             # 踢出主号
@@ -156,3 +161,4 @@ for i in range(deviceNum):
     threadList[i].start()
 for i in range(deviceNum):
     threadList[i].join()
+bar.finish()
