@@ -49,12 +49,12 @@ def templateMatching(filename, device, threshold=0.9, targetPos=5):
     if confidence <= threshold:
         return None
     # 4.标记匹配结果
-    cv2.rectangle(
-        imSearch, maxLoc, (maxLoc[0] + w, maxLoc[1] + h), (0, 255, 0), 3,
-    )
-    cv2.imshow("res", imSearch)
-    cv2.waitKey(1000)
-    cv2.destroyAllWindows()
+    # cv2.rectangle(
+    #     imSearch, maxLoc, (maxLoc[0] + w, maxLoc[1] + h), (0, 255, 0), 3,
+    # )
+    # cv2.imshow("res", imSearch)
+    # cv2.waitKey(1000)
+    # cv2.destroyAllWindows()
     # 5.求点击位置
     pos = getPos(maxLoc, w, h, targetPos)
     return pos
