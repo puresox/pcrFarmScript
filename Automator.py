@@ -17,8 +17,8 @@ class Automator:
 
     def text(self, text):
         self.d.set_fastinput_ime(True)  # 切换成FastInputIME输入法
+        self.d.clear_text()  # 清除输入框所有内容
         self.d.send_keys(text)  # adb广播输入
-        # self.d.clear_text()  # 清除输入框所有内容(Require android-uiautomator.apk version >= 1.0.7)
         self.d.set_fastinput_ime(False)  # 切换成正常的输入法
 
     def keyevent(self, key):
@@ -72,7 +72,7 @@ class Automator:
             self.touchToAnotherPage("tpl1592100695213.png")
             # 挑战
             # self.showToast("正在寻找挑战按钮")
-            self.touchToAnotherPage("tpl1592100750643.png")
+            self.touchToAnotherPage("tpl1592100750643.png", 0.5, 1.5)
             # 选择支援
             # self.showToast("正在寻找支援按钮")
             self.touchToAnotherPage("tpl1592100773675.png")
