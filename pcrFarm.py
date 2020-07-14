@@ -1,4 +1,3 @@
-import uiautomator2 as u2
 import subprocess
 import json
 import threading
@@ -6,7 +5,8 @@ from Automator import *
 from progress.bar import Bar
 
 """获取设备列表"""
-subprocess.check_output("./adb/adb.exe connect 127.0.0.1:5554")  # killing...
+subprocess.check_output("./adb/adb.exe kill-server")  # killing...
+subprocess.check_output("./adb/adb.exe start-server")  # killing...
 lines = (
     subprocess.check_output("./adb/adb.exe devices").decode("utf-8").splitlines()[1:-1]
 )  # 获取设备列表
@@ -63,7 +63,7 @@ goodAccountsLock = threading.Lock()  # 线程锁
 accountIndex = 0  # 账号索引值(互斥访问)
 accountIndexLock = threading.Lock()  # 线程锁
 barrier = threading.Barrier(deviceNum)  # 栅栏
-bar = Bar("脚本运行中", max=accountsNum1 + accountsNum2)
+bar = Bar("loading", max=accountsNum1 + accountsNum2)
 barLock = threading.Lock()  # 线程锁
 
 # 线程函数
