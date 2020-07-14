@@ -63,7 +63,7 @@ goodAccountsLock = threading.Lock()  # 线程锁
 accountIndex = 0  # 账号索引值(互斥访问)
 accountIndexLock = threading.Lock()  # 线程锁
 barrier = threading.Barrier(deviceNum)  # 栅栏
-bar = Bar("loading", max=accountsNum1 + accountsNum2)
+bar = Bar("运行中", max=accountsNum1 + accountsNum2)
 barLock = threading.Lock()  # 线程锁
 
 # 线程函数
@@ -142,9 +142,6 @@ def worker(automator):
         barrier.wait()
 
         if automator.devicesName == devicesNames[0]:
-            # print(
-            #     "账号总计 %d 个，完成地下城总计 %d 个" % (accountsNum1 + accountsNum2, goodAccounts)
-            # )
             # 踢出主号
             automator.dissmiss(accounts[accountsNum1])
             if not kickedOut:
@@ -162,3 +159,4 @@ for i in range(deviceNum):
 for i in range(deviceNum):
     threadList[i].join()
 bar.finish()
+print("运行结束：账号总计 %d 个，完成地下城总计 %d 个" % (accountsNum1 + accountsNum2, goodAccounts))
