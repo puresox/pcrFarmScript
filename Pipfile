@@ -4,7 +4,9 @@ url = "https://mirrors.aliyun.com/pypi/simple/"
 verify_ssl = true
 
 [dev-packages]
+black = "*"
 pyinstaller = "*"
+setuptools = "<45.0.0"
 
 [packages]
 opencv-python = "*"
@@ -12,3 +14,6 @@ uiautomator2 = "*"
 
 [requires]
 python_version = "3.8"
+
+[pipenv]
+allow_prereleases = true

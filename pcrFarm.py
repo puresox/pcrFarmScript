@@ -4,6 +4,9 @@ import threading
 from Automator import *
 from progress.bar import Bar
 
+version = "1.0.0"
+print("当前版本：%s" % (version))
+
 """获取设备列表"""
 subprocess.check_output("./adb/adb.exe kill-server")  # killing...
 subprocess.check_output("./adb/adb.exe start-server")  # killing...

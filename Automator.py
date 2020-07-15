@@ -1,5 +1,5 @@
 import uiautomator2 as u2
-from template import templateMatching
+from cv import getMatchingPos, saveSupporter
 from time import sleep
 
 
@@ -8,11 +8,13 @@ class Automator:
         self.devicesName = devicesName
         self.d = u2.connect(devicesName)
 
+    """一层api"""
+
     def touch(self, pos):
         self.d.click(pos[0], pos[1])
 
-    def exists(self, filename):
-        pos = templateMatching(filename, self.d)
+    def exists(self, filename, threshold=0.9, targetPos=5, method="tpl"):
+        pos = getMatchingPos(filename, self.d, threshold, targetPos, method)
         return pos if pos else False
 
     def text(self, text):
@@ -24,28 +26,42 @@ class Automator:
     def keyevent(self, key):
         self.d.press(key)
 
-    def showToast(self, message):
-        self.d.toast.show(message)
+    # def showToast(self, message):
+    #     self.d.toast.show(message)
+
+    """二层api"""
 
     # 等待模板出现，点击模板，等待模板消失
-    def touchToAnotherPage(self, filename, sleepTime1=0.5, sleepTime2=1):
-        pos = self.exists(filename)
+    def touchToAnotherPage(
+        self,
+        filename,
+        sleepTime1=0.5,
+        sleepTime2=1,
+        threshold=0.9,
+        targetPos=5,
+        method="tpl",
+    ):
+        pos = self.exists(filename, threshold, targetPos, method)
         while not pos:
             sleep(sleepTime1)
-            pos = self.exists(filename)
+            pos = self.exists(filename, threshold, targetPos, method)
         self.touch(pos)
         sleep(sleepTime2)
-        pos = self.exists(filename)
+        pos = self.exists(filename, threshold, targetPos, method)
         while pos:
             self.touch(pos)
             sleep(sleepTime2)
-            pos = self.exists(filename)
+            pos = self.exists(filename, threshold, targetPos, method)
 
     # 点击，直到模板出现
-    def tapUntilPage(self, filename, pos, sleepTime=0.5):
-        while not self.exists(filename):
+    def tapUntilPage(
+        self, filename, pos, sleepTime=0.5, threshold=0.9, targetPos=5, method="tpl"
+    ):
+        while not self.exists(filename, threshold, targetPos, method):
             self.touch(pos)
             sleep(sleepTime)
+
+    """三层api"""
 
     # 任务：完成地下城
     def dxc(self):
@@ -241,6 +257,8 @@ class Automator:
         # 支援设定
         # self.showToast("正在支援设定")
         self.touchToAnotherPage("tpl1593396278172.png")
+        # 上支援人物
+        pass
         while not self.exists("tpl1593393941473.png"):
             sleep(1)
             # self.showToast("\a")
@@ -298,3 +316,18 @@ class Automator:
         # 进入1-1
         # self.showToast("正在进入1-1")
         self.touchToAnotherPage("tpl1592394185153.png")
+
+    # 获取支援人物图片
+    def getSupporter(self, account):
+        # 登录至主页
+        self.loginToIndex(account)
+        # 进入行会页面
+        # self.showToast("正在寻找行会")
+        self.touchToAnotherPage("tpl1593393941473.png")
+        # 支援设定
+        # self.showToast("正在支援设定")
+        self.touchToAnotherPage("tpl1593396278172.png")
+        # 保存支援人物的图片
+        saveSupporter(self.d)
+        # 返回标题页面
+        self.returnTitle()
