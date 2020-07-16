@@ -1,4 +1,5 @@
 import cv2
+import uuid
 
 
 def getPos(leftTopPos, w, h, targetPos):
@@ -38,17 +39,18 @@ def templateMatching(filename, device, threshold=0.9, targetPos=5):
         tuple: 返回坐标或none
     """
     # 1.读取图片
-    imSearch = device.screenshot(format="opencv")
+    imSource = device.screenshot(format="opencv")
     imTpl = cv2.imread("img/{name}".format(name=filename))
     h, w = imTpl.shape[:2]
     # 2.模板匹配
-    res = cv2.matchTemplate(imSearch, imTpl, cv2.TM_CCOEFF_NORMED)
+    res = cv2.matchTemplate(imSource, imTpl, cv2.TM_CCOEFF_NORMED)
     # 3.获取匹配结果
     minVal, maxVal, minLoc, maxLoc = cv2.minMaxLoc(res)
     confidence = maxVal  # 可信度
     if confidence <= threshold:
         return None
     # 4.标记匹配结果
+    # cv2.imwrite("log/%s.png" % (uuid.uuid1()), imSearch)
     # cv2.rectangle(
     #     imSearch, maxLoc, (maxLoc[0] + w, maxLoc[1] + h), (0, 255, 0), 3,
     # )
@@ -58,28 +60,3 @@ def templateMatching(filename, device, threshold=0.9, targetPos=5):
     # 5.求点击位置
     pos = getPos(maxLoc, w, h, targetPos)
     return pos
-
-
-def orbMatching(filename, device, threshold=0.9, targetPos=5):
-    self.detector = cv2.ORB_create()
-    # create BFMatcher object:
-    self.matcher = cv2.BFMatcher(
-        cv2.NORM_HAMMING
-    )  # cv2.NORM_L1 cv2.NORM_L2 cv2.NORM_HAMMING(not useable)
-
-
-def saveSupporter(device):
-    # 1.读取图片
-    screen = device.screenshot(format="opencv")
-    # 2.截取图片
-    supporter1, supporter2 = screen[197:271, 67:141], screen[317:391, 67:141]
-    # 3.保存图片
-    cv2.imwrite("img/supporter/1.png", supporter1)
-    cv2.imwrite("img/supporter/2.png", supporter2)
-
-
-def getMatchingPos(filename, device, threshold=0.9, targetPos=5, method="tpl"):
-    if method == "tpl":
-        return templateMatching(filename, device, threshold, targetPos)
-    elif method == "orb":
-        return orbMatching(filename, device, threshold, targetPos)

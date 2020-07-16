@@ -3,6 +3,7 @@ import json
 import threading
 from Automator import *
 from progress.bar import Bar
+import os
 
 version = "1.0.0"
 print("当前版本：%s" % (version))
@@ -163,3 +164,4 @@ for i in range(deviceNum):
     threadList[i].join()
 bar.finish()
 print("运行结束：账号总计 %d 个，完成地下城总计 %d 个" % (accountsNum1 + accountsNum2, goodAccounts))
+os.system("pause")

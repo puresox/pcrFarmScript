@@ -1,5 +1,5 @@
 import uiautomator2 as u2
-from cv import getMatchingPos, saveSupporter
+from cv.cv import getMatchingPos, saveSupporter
 from time import sleep
 
 
