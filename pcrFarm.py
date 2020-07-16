@@ -37,6 +37,11 @@ def worker(devicesName, farm):
     automator = Automator(devicesName)
     # 返回首页
     automator.keyevent("home")
+    # 关闭公主连结
+    pcrName = "com.bilibili.priconne"
+    apps = automator.listRunningApps()
+    if pcrName in apps:
+        automator.stopApp(pcrName)
     # 打开公主连结APP
     automator.touchToAnotherPage("tpl1592013602699.png")
     # 完成一个农场
@@ -101,6 +106,7 @@ if __name__ == "__main__":
         print("请注意：执行完后将被踢出工会！")
 
     """多进程完成农场"""
+    print("正在初始化子进程")
     processList = []  # 进程列表
     for devicesName in devicesNames:
         p = multiprocessing.Process(target=worker, args=(devicesName, farm,))

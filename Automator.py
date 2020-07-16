@@ -26,6 +26,12 @@ class Automator:
     def keyevent(self, key):
         self.d.press(key)
 
+    def listRunningApps(self):
+        return self.d.app_list_running()
+
+    def stopApp(self, name):
+        self.d.app_stop(name)
+
     # def showToast(self, message):
     #     self.d.toast.show(message)
 
