@@ -2,14 +2,15 @@ from Automator import *
 
 
 def finishTheAccount(automator, account):
+    dxcFin = False
     # 登录至主页
     automator.loginToIndex(account)
     # 任务：完成地下城
     if automator.dxc():
-        return True
+        dxcFin = True
     # 返回标题页面
     automator.returnTitle()
-    return False
+    return dxcFin
 
 
 # 进程函数
