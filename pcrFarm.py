@@ -7,6 +7,7 @@ from mutiprocessFunc import worker
 
 
 if __name__ == "__main__":
+    multiprocessing.freeze_support()
     version = "1.1.0"
     print("当前版本：%s" % (version))
 
