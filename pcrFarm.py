@@ -1,83 +1,13 @@
 import subprocess
 import multiprocessing
-from Automator import *
-from Farm import *
 import os
-
-
-def finishFarm(automator, upperLimit, farm):
-    # 完成一个农场
-    while True:
-        farm.accountIndexLock.acquire()  # 上锁
-        if farm.accountIndex >= upperLimit:
-            farm.accountIndexLock.release()  # 解锁
-            break
-        account = farm.accounts[farm.accountIndex]
-        farm.accountIndex += 1
-        farm.accountIndexLock.release()  # 解锁
-        # 登录至主页
-        automator.loginToIndex(account)
-        # 任务：完成地下城
-        if automator.dxc():
-            farm.goodAccountsLock.acquire()  # 上锁
-            farm.goodAccounts += 1
-            farm.goodAccountsLock.release()  # 解锁
-        # 返回标题页面
-        automator.returnTitle()
-        # 进度更新
-        farm.barLock.acquire()  # 上锁
-        farm.bar.next()
-        farm.barLock.release()  # 解锁
-    # 等待其他进程
-    farm.barrier.wait()
-
-
-# 进程函数
-def worker(devicesName, farm):
-    automator = Automator(devicesName)
-    # 返回首页
-    automator.keyevent("home")
-    # 关闭公主连结
-    pcrName = "com.bilibili.priconne"
-    apps = automator.listRunningApps()
-    if pcrName in apps:
-        automator.stopApp(pcrName)
-    # 打开公主连结APP
-    automator.touchToAnotherPage("tpl1592013602699.png")
-    # 完成一个农场
-    finishFarm(automator, farm.accountsNum1, farm)
-
-    if farm.farmNum == 1:
-        if automator.devicesName == devicesNames[0]:
-            # print("账号总计 %d 个，完成地下城总计 %d 个" % (accountsNum1, goodAccounts))
-            if farm.kickedOut:
-                # 踢出主号
-                automator.dissmiss(farm.accounts[0])
-    elif farm.farmNum == 2:
-        if automator.devicesName == devicesNames[0]:
-            # 踢出主号
-            automator.dissmiss(farm.accounts[0])
-            # 会长邀请
-            automator.invite(farm.accounts[farm.accountsNum1], farm.id)
-            # 主号加入第二个农场
-            automator.joinIn([farm.mainAccountName, farm.mainAccountPassword])
-        # 等待其他进程
-        farm.barrier.wait()
-        # 完成一个农场
-        finishFarm(automator, farm.accountsNum1 + farm.accountsNum2, farm)
-
-        if automator.devicesName == devicesNames[0]:
-            # 踢出主号
-            automator.dissmiss(farm.accounts[farm.accountsNum1])
-            if not farm.kickedOut:
-                # 会长邀请
-                automator.invite(farm.accounts[0], farm.id)
-                # 主号加入第1个农场
-                automator.joinIn([farm.mainAccountName, farm.mainAccountPassword])
+from progress.bar import Bar
+import json
+from mutiprocessFunc import worker
 
 
 if __name__ == "__main__":
-    version = "1.0.0"
+    version = "1.1.0"
     print("当前版本：%s" % (version))
 
     """获取设备列表"""
@@ -95,28 +25,96 @@ if __name__ == "__main__":
         if lineSplit[1] == "device":
             devicesNames.append(lineSplit[0])
     deviceNum = len(devicesNames)
-    print("发现%d个模拟器,列表如下:" % (deviceNum))
+    print("发现如下%d个模拟器:" % (deviceNum))
     for devicesName in devicesNames:
         print(devicesName)
 
-    """初始化农场类"""
-    farm = Farm(deviceNum)
-    print("农场数量：%d" % (farm.farmNum))
-    if farm.kickedOut:
+    """获取配置"""
+    config, configPath = {}, "config/config.json"
+    with open(configPath, encoding="utf-8-sig") as configStr:
+        config = json.load(configStr)
+        farmNum, kickedOut, mainAccountName, mainAccountPassword, id = (
+            config["farmNum"],
+            config["kickedOut"],
+            config["mainAccountName"],
+            config["mainAccountPassword"],
+            config["id"],
+        )
+    print("农场数量：%d" % (farmNum))
+    if kickedOut:
         print("请注意：执行完后将被踢出工会！")
 
+    """读取账号信息"""
+    # lines:账号字符串行列表
+    # accounts:账号列表 账号为account[0]，密码为account[1]
+    # accountsNum1, accountsNum2:账号数量
+    lines, accounts = ([], [])
+    with open("config/farm01.txt") as f:
+        lines1 = f.readlines()
+        accountsNum1 = len(lines1)
+        lines += lines1
+    with open("config/farm02.txt") as f:
+        lines2 = f.readlines()
+        accountsNum2 = len(lines2)
+        lines += lines2
+    for line in lines:
+        accounts.append(line.strip("\n").split(" "))
+
+    """进程通信"""
+    accountQueue = multiprocessing.Queue()
+    finishQueue = multiprocessing.Queue()
+
     """多进程完成农场"""
-    print("正在初始化子进程")
+    dxcFinAccount = 0
+    processBar = Bar("初始化子进程", max=deviceNum)
+    farmBar = Bar("运行中", max=accountsNum1 + accountsNum2)
     processList = []  # 进程列表
     for devicesName in devicesNames:
-        p = multiprocessing.Process(target=worker, args=(devicesName, farm,))
+        processBar.next()
+        p = multiprocessing.Process(
+            target=worker, args=(devicesName, accountQueue, finishQueue)
+        )
         p.start()
         processList.append(p)
+    processBar.finish()
+    # 账号队列accountQueue: "account","exit","firstFin","secondFin"
+    # 账号完成队列finishQueue: "accountFin","firstFin","secondFin"
+    # 输入第一个农场的账号
+    for i in range(accountsNum1):
+        accountQueue.put({"info": "account", "data": accounts[i]})
+    # 完成第一个农场的账号
+    for i in range(accountsNum1):
+        recv = finishQueue.get()
+        farmBar.next()
+        if recv["data"] == "dxc":
+            dxcFinAccount += 1
+    # 换农场
+    accountQueue.put(
+        {"info": "firstFin", "data": [config, accounts[0], accounts[accountsNum1]]}
+    )
+    # 完成换农场
+    recv = finishQueue.get()
+    if farmNum == 2:
+        # 输入第二个农场的账号
+        for i in range(accountsNum2):
+            accountQueue.put({"info": "account", "data": accounts[accountsNum1 + i]})
+        # 完成第二个农场的账号
+        for i in range(accountsNum2):
+            recv = finishQueue.get()
+            farmBar.next()
+            if recv["data"] == "dxc":
+                dxcFinAccount += 1
+        # 换农场
+        accountQueue.put(
+            {"info": "secondFin", "data": [config, accounts[0], accounts[accountsNum1]]}
+        )
+        # 完成换农场
+        recv = finishQueue.get()
+    # 完成
+    for i in range(deviceNum):
+        accountQueue.put({"info": "exit"})
     for p in processList:
         p.join()
-    farm.bar.finish()
-    print(
-        "运行结束：账号总计 %d 个，完成地下城总计 %d 个"
-        % (farm.accountsNum1 + farm.accountsNum2, farm.goodAccounts)
-    )
+    farmBar.finish()
+    print("运行结束：账号总计 %d 个，完成地下城总计 %d 个" % (accountsNum1 + accountsNum2, dxcFinAccount))
     os.system("pause")
