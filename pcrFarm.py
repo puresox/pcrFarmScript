@@ -9,7 +9,7 @@ from mutiprocessFunc import worker
 if __name__ == "__main__":
     # pyinstaller: When using the multiprocessing module, you must call
     multiprocessing.freeze_support()
-    version = "1.1.0"
+    version = "1.1.5"
     print("当前版本：%s" % (version))
 
     """获取设备列表"""
