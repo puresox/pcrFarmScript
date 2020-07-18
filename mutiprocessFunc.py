@@ -1,13 +1,11 @@
-from Automator import *
+from Automator import Automator
 
 
 def finishTheAccount(automator, account):
-    dxcFin = False
     # 登录至主页
     automator.loginToIndex(account)
     # 任务：完成地下城
-    if automator.dxc():
-        dxcFin = True
+    dxcFin = automator.dxc()
     # 返回标题页面
     automator.returnTitle()
     return dxcFin
@@ -38,6 +36,9 @@ def worker(devicesName, accountQueue, finishQueue):
             if config["farmNum"] == 1 and config["kickedOut"]:
                 automator.dissmiss(account1)
             elif config["farmNum"] == 2:
+                automator.getSupporter(
+                    [config["mainAccountName"], config["mainAccountPassword"]]
+                )
                 # 踢出主号
                 automator.dissmiss(account1)
                 # 会长邀请
@@ -49,6 +50,9 @@ def worker(devicesName, accountQueue, finishQueue):
             finishQueue.put({"info": "firstFin"})
         elif recv["info"] == "secondFin":
             config, account1, account2 = recv["data"]
+            automator.getSupporter(
+                [config["mainAccountName"], config["mainAccountPassword"]]
+            )
             # 踢出主号
             automator.dissmiss(account2)
             if not config["kickedOut"]:

@@ -1,5 +1,6 @@
 import cv2
-import uuid
+
+# import uuid
 
 
 def getPos(leftTopPos, w, h, targetPos):

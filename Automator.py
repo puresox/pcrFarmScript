@@ -13,6 +13,9 @@ class Automator:
     def touch(self, pos):
         self.d.click(pos[0], pos[1])
 
+    def swipe(self, pos1, pos2):
+        self.d.swipe(pos1[0], pos1[1], pos2[0], pos2[1])
+
     def exists(self, filename, threshold=0.9, targetPos=5, method="tpl"):
         pos = getMatchingPos(filename, self.d, threshold, targetPos, method)
         return pos if pos else False
@@ -263,11 +266,28 @@ class Automator:
         # 支援设定
         # self.showToast("正在支援设定")
         self.touchToAnotherPage("tpl1593396278172.png")
-        # 上支援人物
-        pass
-        while not self.exists("tpl1593393941473.png"):
-            sleep(1)
-            # self.showToast("\a")
+        # 第一个支援人物
+        self.tapUntilPage("c0b28d66-c8b7-11ea-9280-002b677d96d5.png", (108, 237))
+        pos = self.exists("supporter/1.png", method="kaze")
+        while not pos:
+            self.swipe((480, 332), (480, 120))
+            pos = self.exists("supporter/1.png", method="kaze")
+        self.touch(pos)
+        sleep(0.5)
+        self.touch((835, 451))
+        sleep(0.5)
+        self.touchToAnotherPage("tpl1592028260285.png")
+        # 第二个支援人物
+        self.tapUntilPage("c0b28d66-c8b7-11ea-9280-002b677d96d5.png", (108, 360))
+        pos = self.exists("supporter/2.png", method="kaze")
+        while not pos:
+            self.swipe((480, 332), (480, 120))
+            pos = self.exists("supporter/2.png", method="kaze")
+        self.touch(pos)
+        sleep(0.5)
+        self.touch((835, 451))
+        sleep(0.5)
+        self.touchToAnotherPage("tpl1592028260285.png")
         # 返回标题页面
         self.returnTitle()
 
@@ -333,6 +353,8 @@ class Automator:
         # 支援设定
         # self.showToast("正在支援设定")
         self.touchToAnotherPage("tpl1593396278172.png")
+        while not self.exists("092ccac7-c8b7-11ea-99e2-002b677d96d5_cr.png"):
+            sleep(0.5)
         # 保存支援人物的图片
         saveSupporter(self.d)
         # 返回标题页面
