@@ -272,6 +272,7 @@ class Automator:
         while not pos:
             self.swipe((480, 332), (480, 120))
             pos = self.exists("supporter/1.png", method="kaze")
+        sleep(0.5)
         self.touch(pos)
         sleep(0.5)
         self.touch((835, 451))
@@ -283,6 +284,7 @@ class Automator:
         while not pos:
             self.swipe((480, 332), (480, 120))
             pos = self.exists("supporter/2.png", method="kaze")
+        sleep(0.5)
         self.touch(pos)
         sleep(0.5)
         self.touch((835, 451))
