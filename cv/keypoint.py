@@ -34,7 +34,7 @@ def getKeyPoints(imSearch, imSource):
 
 
 def handleGoodPoints(kpSch, kpSrc, good, imSearch, imSource):
-    if len(good) < 4:
+    if len(good) < 10:
         return None
     else:
         """特征点匹配点对数目>=4个，可使用单矩阵映射,求出识别的目标区域."""

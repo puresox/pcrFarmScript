@@ -1,6 +1,7 @@
 import uiautomator2 as u2
 from cv.cv import getMatchingPos, saveSupporter
 from time import sleep
+import random
 
 
 class Automator:
@@ -199,17 +200,18 @@ class Automator:
         # 进入我的主页
         # self.showToast("正在进入我的主页")
         while not self.exists("tpl1592027165856.png"):
-            self.touch((5, 478))
+            self.touch((480, 462))
             if self.exists("tpl1594515801792.png"):
                 self.touchToAnotherPage("tpl1594515801792.png")
             elif self.exists("tpl1594515626665.png"):
                 sleep(1.0)
-                self.touch((413, 305))
+                runPos = random.randint(1, 4)
+                self.touch((runPos * 200, 310))
                 sleep(1.0)
                 self.touchToAnotherPage("tpl1594515653971.png")
                 self.touchToAnotherPage("tpl1594515801792.png")
         sleep(1.0)
-        self.touch((5, 478))
+        self.touch((480, 462))
 
     # 返回标题页面
     def returnTitle(self):
