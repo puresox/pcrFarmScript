@@ -4,6 +4,8 @@ from Automator import Automator
 def finishTheAccount(automator, account):
     # 登录至主页
     automator.loginToIndex(account)
+    # 购买mana
+    automator.buyMana()
     # 任务：完成地下城
     dxcFin = automator.dxc()
     # 返回标题页面

@@ -65,13 +65,20 @@ class Automator:
 
     # 点击，直到模板出现
     def tapUntilPage(
-        self, filename, pos, sleepTime=0.5, threshold=0.9, targetPos=5, method="tpl"
+        self, filename, pos, sleepTime=1, threshold=0.9, targetPos=5, method="tpl"
     ):
         while not self.exists(filename, threshold, targetPos, method):
             self.touch(pos)
             sleep(sleepTime)
 
     """三层api"""
+    # 购买mana
+    def buyMana(self):
+        self.tapUntilPage("tpl1592394358740.png", (187, 62))
+        for i in range(3):
+            self.tapUntilPage("tpl1592028260285.png", (593, 477), sleepTime=1)
+            self.touchToAnotherPage("tpl1592028260285.png")
+        self.tapUntilPage("tpl1592027165856.png", (12, 260))
 
     # 任务：完成地下城
     def dxc(self):
@@ -225,6 +232,35 @@ class Automator:
         # self.showToast("正在寻找确认按钮")
         self.touchToAnotherPage("tpl1592028260285.png")
 
+    # 任务：刷1-1
+    def shua(self):
+        # 进入冒险
+        # self.showToast("正在进入冒险")
+        self.touchToAnotherPage("tpl1592027165856.png")
+        # 进入主线关卡
+        # self.showToast("正在进入主线关卡")
+        self.touchToAnotherPage("tpl1592393876870.png")
+        # 进入地图
+        # self.showToast("正在进入地图")
+        self.touchToAnotherPage("tpl1592393984404.png")
+        # 进入1图
+        # self.showToast("正在进入1图")
+        self.touchToAnotherPage("tpl1592394102731.png")
+        # 购买扫荡券
+        # self.showToast("购买扫荡券")
+        self.tapUntilPage(
+            "tpl1592394358740.png", (796, 29),
+        )
+        self.touchToAnotherPage("tpl1592394438890.png")
+        self.touchToAnotherPage("tpl1592028260285.png")
+        self.touchToAnotherPage("tpl1592394536139.png")
+        self.touchToAnotherPage("tpl1592028260285.png")
+        self.touchToAnotherPage("tpl1592394569588.png")
+        # 进入1-1
+        # self.showToast("正在进入1-1")
+        self.touchToAnotherPage("tpl1592394185153.png")
+
+    """四层api"""
     # 踢出主号
     def dissmiss(self, account):
         # 账号为account[0]，密码为account[1]
@@ -318,34 +354,6 @@ class Automator:
         self.touchToAnotherPage("tpl1592028260285.png")
         # 返回标题页面
         self.returnTitle()
-
-    # 任务：刷1-1
-    def shua(self):
-        # 进入冒险
-        # self.showToast("正在进入冒险")
-        self.touchToAnotherPage("tpl1592027165856.png")
-        # 进入主线关卡
-        # self.showToast("正在进入主线关卡")
-        self.touchToAnotherPage("tpl1592393876870.png")
-        # 进入地图
-        # self.showToast("正在进入地图")
-        self.touchToAnotherPage("tpl1592393984404.png")
-        # 进入1图
-        # self.showToast("正在进入1图")
-        self.touchToAnotherPage("tpl1592394102731.png")
-        # 购买扫荡券
-        # self.showToast("购买扫荡券")
-        self.tapUntilPage(
-            "tpl1592394358740.png", (796, 29),
-        )
-        self.touchToAnotherPage("tpl1592394438890.png")
-        self.touchToAnotherPage("tpl1592028260285.png")
-        self.touchToAnotherPage("tpl1592394536139.png")
-        self.touchToAnotherPage("tpl1592028260285.png")
-        self.touchToAnotherPage("tpl1592394569588.png")
-        # 进入1-1
-        # self.showToast("正在进入1-1")
-        self.touchToAnotherPage("tpl1592394185153.png")
 
     # 获取支援人物图片
     def getSupporter(self, account):
